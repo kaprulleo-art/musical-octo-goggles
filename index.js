@@ -4,6 +4,9 @@ dotenv.config();
 import fetch from 'node-fetch';
 import { Telegraf, Markup } from 'telegraf';
 
+import http from 'http';
+http.createServer((req, res) => res.end('Bot is running')).listen(process.env.PORT || 3000);
+
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const JSONBIN_USERS_BIN_ID = process.env.JSONBIN_USERS_BIN_ID;
 const JSONBIN_ADMINS_BIN_ID = process.env.JSONBIN_ADMINS_BIN_ID;
@@ -113,7 +116,7 @@ bot.start(async (ctx) => {
   return ctx.reply(
     'Вас приветствует команда MR',
     Markup.inlineKeyboard([
-      [ Markup.button.url('Открыть приложения', 'https://t.me/mr') ],
+      [ Markup.button.url('Открыть приложения', 'https://rogers1234556.github.io/Modele-/') ],
       [ Markup.button.url('Наш канал', 'https://t.me/mr') ],
       [ Markup.button.callback('Написать в поддержку', 'open_support') ],
     ])
@@ -345,12 +348,4 @@ async function handleAdminReply(ctx) {
 }
 
 
-bot.launch()
-  .then(() => console.log('Bot started'))
-  .catch(err => {
-    console.error('Bot launch error', err);
-    process.exit(1);
-  });
-
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+bot.launch();
