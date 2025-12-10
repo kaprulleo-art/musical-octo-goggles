@@ -110,19 +110,30 @@ bot.start(async (ctx) => {
     await saveUsers(data);
   }
 
-  // закрываем старую сессию (если была)
   supportSessions.delete(tgId);
 
   return ctx.reply(
     'Вас приветствует команда MR',
-    Markup.inlineKeyboard([
-      [ Markup.button.url('Открыть приложения', 'https://rogers1234556.github.io/Modele-/') ],
-      [ Markup.button.url('Наш канал', 'https://t.me/mr') ],
-      [ Markup.button.callback('Написать в поддержку', 'open_support') ],
-    ])
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'Открыть приложение',
+              web_app: { url: 'https://rogers1234556.github.io/Modele-/' }
+            }
+          ],
+          [
+            { text: 'Наш канал', url: 'https://t.me/mr' }
+          ],
+          [
+            { text: 'Написать в поддержку', callback_data: 'open_support' }
+          ]
+        ]
+      }
+    }
   );
 });
-
 // ---------------------- Нажатие "Написать в поддержку" ----------------------
 bot.action('open_support', async (ctx) => {
   try { await ctx.answerCbQuery(); } catch {}
