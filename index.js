@@ -1,7 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api'
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
-import crypto from 'crypto'
 
 dotenv.config()
 
@@ -257,7 +256,7 @@ async function handleSupportTopic(chatId, userId, topic) {
 async function saveSupportChoice(chatId, userId, topic) {
   try {
     // Получаем информацию о пользователе
-    const { data: user, error } = await supabase
+    const { data: user } = await supabase
       .from('users')
       .select('telegram, name')
       .eq('idtg', userId)
@@ -630,7 +629,7 @@ bot.on('message', async (msg) => {
 
     // Сохраняем сообщение в поддержку
     // Сохраняем сообщение в поддержку
-    const { data: insertedData, error } = await supabase
+    const { data: error } = await supabase
       .from('support_messages')
       .insert({
         chat_id: chatId,
