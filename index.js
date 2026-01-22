@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api'
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
+import crypto from 'crypto'
 
 dotenv.config()
 
@@ -256,7 +257,7 @@ async function handleSupportTopic(chatId, userId, topic) {
 async function saveSupportChoice(chatId, userId, topic) {
   try {
     // Получаем информацию о пользователе
-    const { data: user } = await supabase
+    const { data: user, error } = await supabase
       .from('users')
       .select('telegram, name')
       .eq('idtg', userId)
@@ -629,7 +630,7 @@ bot.on('message', async (msg) => {
 
     // Сохраняем сообщение в поддержку
     // Сохраняем сообщение в поддержку
-    const { data: error } = await supabase
+    const { data: insertedData, error } = await supabase
       .from('support_messages')
       .insert({
         chat_id: chatId,
@@ -677,85 +678,6 @@ bot.on('message', async (msg) => {
 let rateLimitDelay = 0
 let isProcessing = false
 
-// === Проверка и отправка ответов администраторов ===
-// async function checkAndSendAdminMessages() {
-//   if (isProcessing || rateLimitDelay > 0) return
-
-//   isProcessing = true
-
-//   try {
-//     console.log('🔍 Checking for admin messages...')
-
-//     const { data: messages, error } = await supabase
-//       .from('support_messages')
-//       .select('*')
-//       .eq('sender', 'admin')
-//       .eq('sent_to_user', false)
-//       .order('created_at', { ascending: true })
-//       .limit(3)
-
-//     if (error || !messages || messages.length === 0) {
-//       return
-//     }
-
-//     console.log(`📨 Found ${messages.length} admin messages to send`)
-
-//     for (const msg of messages) {
-//       try {
-//         // Ждем если есть rate limit
-//         if (rateLimitDelay > 0) {
-//           console.log(`⏳ Rate limit delay: ${rateLimitDelay}s`)
-//           await new Promise(resolve => setTimeout(resolve, rateLimitDelay * 1000))
-//           rateLimitDelay = 0
-//         }
-
-//         // Отправляем сообщение пользователю
-//         await bot.sendMessage(msg.chat_id, 
-//           `${msg.message}`,
-//           { parse_mode: 'Markdown' }
-//         )
-
-//         // Помечаем как отправленное
-//         const { error: updateError } = await supabase
-//           .from('support_messages')
-//           .update({ sent_to_user: true })
-//           .eq('id', msg.id)
-
-//         if (!updateError) {
-//           console.log(`✅ Sent message ${msg.id} to ${msg.chat_id}`)
-//         }
-
-//         // Задержка между сообщениями
-//         await new Promise(resolve => setTimeout(resolve, 1000))
-
-//       } catch (telegramError) {
-//         console.error(`Error sending to ${msg.chat_id}:`, telegramError.message)
-
-//         // Обработка rate limiting
-//         if (telegramError.response?.statusCode === 429) {
-//           rateLimitDelay = telegramError.response.body?.parameters?.retry_after || 20
-//           console.log(`⚠️ Rate limit! Waiting ${rateLimitDelay}s`)
-//           break
-//         }
-
-//         // Если пользователь заблокировал бота
-//         if (telegramError.response?.statusCode === 403) {
-//           console.log(`❌ User ${msg.chat_id} blocked the bot`)
-//           // Помечаем как отправленное чтобы не пытаться снова
-//           await supabase
-//             .from('support_messages')
-//             .update({ sent_to_user: true })
-//             .eq('id', msg.id)
-//         }
-//       }
-//     }
-
-//   } catch (error) {
-//     console.error('Error in checkAndSendAdminMessages:', error)
-//   } finally {
-//     isProcessing = false
-//   }
-// }
 // === Уведомление админов о новом сообщении ===
 async function notifyAdminsAboutNewMessage(userId, username, fullName, messageText, topic = 'Не указана') {
   try {
